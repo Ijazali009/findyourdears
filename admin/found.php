@@ -16,10 +16,16 @@ if (isset($_GET['action'])) {
 
         case 'delete':
             if ($is_admin) {
+                // First delete the record
                 $sql = "DELETE FROM found_persons WHERE id = ?";
                 $stmt = $conn->prepare($sql);
                 $stmt->bind_param("i", $id);
                 if ($stmt->execute()) {
+                    // Reset auto increment
+                    $conn->query("ALTER TABLE found_persons AUTO_INCREMENT = 1");
+                    // Reset IDs to be sequential
+                    $conn->query("SET @count = 0");
+                    $conn->query("UPDATE found_persons SET id = @count:= @count + 1");
                     $success_message = "Record deleted successfully";
                 } else {
                     $error_message = "Error deleting record";
